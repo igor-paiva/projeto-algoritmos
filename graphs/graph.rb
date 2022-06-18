@@ -17,7 +17,7 @@ class Graph
   attr_reader :visited
   attr_reader :directed
 
-  def initialize(directed = true)
+  def initialize(directed = false)
     @visited = {}
     @nodes = {}
     @directed = directed
