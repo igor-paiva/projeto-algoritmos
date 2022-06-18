@@ -88,8 +88,6 @@ class Graph
       next if visited[v]
 
       trees << dfs_visit(v)
-
-      puts
     end
 
     trees
@@ -118,15 +116,12 @@ class Graph
   end
 
   def bfs
-    queue = []
     trees = []
 
     nodes.keys.each do |s|
       next if visited[s]
 
       trees << bfs_from_start(s)
-
-      puts
     end
 
     trees
@@ -167,14 +162,6 @@ class Graph
   end
 end
 
-def print_trees(trees)
-  trees.each_index do |idx|
-    puts "Tree #{idx}:"
-
-    trees[idx].traverse(trees[idx].root, "\t")
-  end
-end
-
 def main
   graph = Graph.new()
 
@@ -199,7 +186,7 @@ def main
   puts "Number of edges: #{graph.edges}\n\n"
 
   puts 'DFS sem nó de início'
-  print_trees(graph.depth_first_search())
+  Tree.traverse_trees(graph.depth_first_search())
   graph.clear_visited
   puts
 
@@ -216,7 +203,7 @@ def main
   puts "\n-------------------------------------------------------\n\n"
 
   puts 'BFS sem nó de início:'
-  print_trees(graph.breadth_first_search())
+  Tree.traverse_trees(graph.breadth_first_search())
   graph.clear_visited
   puts
 

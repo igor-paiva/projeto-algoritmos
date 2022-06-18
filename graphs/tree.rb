@@ -15,6 +15,14 @@ class Tree
     @root = root
   end
 
+  def self.traverse_trees(trees)
+    trees.each_with_index do |tree, idx|
+      puts "Tree #{idx}:"
+
+      tree.traverse(tree.root, "\t")
+    end
+  end
+
   def traverse(root = @root, prefix = '')
     puts "#{prefix}#{root.id}"
 
