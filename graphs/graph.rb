@@ -15,10 +15,12 @@ end
 class Graph
   attr_reader :nodes
   attr_reader :visited
+  attr_reader :directed
 
-  def initialize
+  def initialize(directed = true)
     @visited = {}
     @nodes = {}
+    @directed = directed
   end
 
   def length
@@ -26,7 +28,11 @@ class Graph
   end
 
   def edges
-    nodes.values.sum { |v| v[:adj_list].length } / 2
+    sum_all_degrees = nodes.values.sum { |v| v[:adj_list].length }
+
+    return sum_all_degrees / 2 if directed
+
+    sum_all_degrees
   end
 
   def node_exists?(id)
@@ -40,7 +46,7 @@ class Graph
 
     add_one_dir_edge(src, dest)
 
-    add_one_dir_edge(dest, src)
+    add_one_dir_edge(dest, src) if directed
   end
 
   def add_node(id, data)
