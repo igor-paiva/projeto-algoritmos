@@ -14,11 +14,9 @@ end
 
 class Graph
   attr_reader :nodes
-  attr_reader :visited
   attr_reader :directed
 
   def initialize(directed = false)
-    @visited = {}
     @nodes = {}
     @directed = directed
   end
@@ -30,7 +28,7 @@ class Graph
   def edges
     sum_all_degrees = nodes.values.sum { |v| v[:adj_list].length }
 
-    return sum_all_degrees / 2 if directed
+    return sum_all_degrees / 2 unless directed
 
     sum_all_degrees
   end
@@ -104,10 +102,6 @@ class Graph
     return dfs
   end
 
-  def clear_visited
-    @visited = {}
-  end
-
   private
 
   def raise_exception(msg)
@@ -120,28 +114,27 @@ class Graph
 
   def dfs
     trees = []
+    visited = {}
 
     nodes.keys.each do |v|
       next if visited[v]
 
-      trees << dfs_visit(v)
+      trees << dfs_visit(v, visited)
     end
 
     trees
   end
 
-  def dfs_visit(v, tree = nil)
-    visit_node(v)
+  def dfs_visit(v, visited = {}, tree = nil)
+    visited[v] = true
 
     tree ||= Tree.new(TreeNode.new(v))
 
     nodes.dig(v, :adj_list).each do |w|
       unless visited[w]
-        # puts "#{v} - #{w}"
-
         tree.insert(tree.root, v, TreeNode.new(w))
 
-        dfs_visit(w, tree)
+        dfs_visit(w, visited, tree)
       end
     end
 
@@ -154,20 +147,21 @@ class Graph
 
   def bfs
     trees = []
+    visited = {}
 
     nodes.keys.each do |s|
       next if visited[s]
 
-      trees << bfs_from_start(s)
+      trees << bfs_from_start(s, visited)
     end
 
     trees
   end
 
-  def bfs_from_start(start)
+  def bfs_from_start(start, visited = {})
     queue = [start]
 
-    visit_node(start)
+    visited[start] = true
 
     tree = Tree.new(TreeNode.new(start))
 
@@ -176,9 +170,7 @@ class Graph
 
       nodes.dig(u, :adj_list).each do |v|
         unless visited[v]
-          # puts "#{u} - #{v}"
-
-          visit_node(v)
+          visited[v] = true
 
           tree.insert(tree.root, u, TreeNode.new(v))
 
@@ -192,10 +184,6 @@ class Graph
 
   def add_one_dir_edge(src, dest)
     nodes[src][:adj_list] << dest
-  end
-
-  def visit_node(node)
-    visited[node] = true
   end
 end
 
@@ -223,36 +211,30 @@ def main
   puts "Number of edges: #{graph.edges}\n\n"
 
   puts 'DFS sem nó de início'
-  Tree.traverse_trees(graph.depth_first_search())
-  graph.clear_visited
+  Tree.traverse_trees(graph.depth_first_search)
   puts
 
   puts 'DFS com nó de início'
   tree = graph.depth_first_search(1)
   tree.traverse(tree.root, "\t")
-  graph.clear_visited
   puts
 
   # puts 'DFS com nó de início e nó de destino'
   # graph.depth_first_search(1, 6)
-  # graph.clear_visited
 
   puts "\n-------------------------------------------------------\n\n"
 
   puts 'BFS sem nó de início:'
   Tree.traverse_trees(graph.breadth_first_search())
-  graph.clear_visited
   puts
 
   puts 'BFS com nó de início:'
   tree = graph.breadth_first_search(1)
   tree.traverse(tree.root, "\t")
-  graph.clear_visited
   puts
 
   # puts 'BFS com nó de início e nó de destino'
   # graph.breadth_first_search(1, 6)
-  # graph.clear_visited
 end
 
-main()
+# main()
