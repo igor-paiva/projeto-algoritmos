@@ -2,6 +2,54 @@ require 'helpers'
 require_relative '../graphs/graph'
 
 RSpec.describe Graph do
+  describe "#depth_first_search" do
+    graph = Graph.new()
+
+    add_nodes(graph, Array.new(7) { |i| i + 1 })
+    add_edges(
+      graph,
+      [[1, 4], [1, 5], [1, 2], [4, 2], [4, 5], [2, 6], [3, 7]]
+    )
+
+    it 'return the DFS tree when start and dest nodes are not provided' do
+      expected_trees = [
+        Tree.new(
+          TreeNode.new(
+            1,
+            [TreeNode.new(4, [TreeNode.new(2, [TreeNode.new(6)]), TreeNode.new(5)])]
+          ),
+        ),
+        Tree.new(TreeNode.new(3, [TreeNode.new(7)])),
+      ]
+
+      expect(graph.depth_first_search).to match_array(expected_trees)
+    end
+
+    context 'when the start node is provided' do
+      it 'return the DFS tree starting in node 1' do
+        expected_tree = Tree.new(
+          TreeNode.new(
+            1,
+            [TreeNode.new(4, [TreeNode.new(2, [TreeNode.new(6)]), TreeNode.new(5)])]
+          ),
+        )
+
+        expect(graph.depth_first_search(1)).to eq(expected_tree)
+      end
+
+      it 'return the DFS tree starting in node 4' do
+        expected_tree = Tree.new(
+          TreeNode.new(
+            4,
+            [TreeNode.new(1, [TreeNode.new(5), TreeNode.new(2, [TreeNode.new(6)])])]
+          ),
+        )
+
+        expect(graph.depth_first_search(4)).to eq(expected_tree)
+      end
+    end
+  end
+
   describe "#breadth_first_search" do
     graph = Graph.new()
 
