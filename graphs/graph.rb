@@ -57,6 +57,37 @@ class Graph
     nodes[id] = { node: node, adj_list: [] }
   end
 
+  def bipartite?
+    visited = {}
+    colors = {}
+
+    nodes.keys.each do |s|
+      next if visited[s]
+
+      queue = [s]
+
+      visited[s] = true
+      colors[s] = false
+
+      while !queue.empty?
+        u = queue.pop
+
+        nodes.dig(u, :adj_list).each do |v|
+          unless visited[v]
+            visited[v] = true
+            colors[v] = !colors[u]
+
+            queue.push(v)
+          else
+            return false if colors[u] == colors[v]
+          end
+        end
+      end
+    end
+
+    true
+  end
+
   def breadth_first_search(start = nil, dest = nil)
     return bfs_from_start_to_dest(start, dest) if start && dest
 
