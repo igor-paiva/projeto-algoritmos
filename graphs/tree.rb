@@ -23,6 +23,26 @@ class Tree
     end
   end
 
+  def self.compare_trees(root, other_root)
+    return false if root.id != other_root.id
+
+    # não sei se é legal fazer isso, é bom que não precisa fazer
+    # a descida recursiva, mas se tiver muitos filhos não é algo legal
+    return false if root.children.map(&:id).sort != other_root.children.map(&:id).sort
+
+    root.children.each_with_index do |child, idx|
+      cmp = compare_trees(child, other_root.children[idx])
+
+      return false unless cmp
+    end
+
+    true
+  end
+
+  def ==(other_tree)
+    Tree.compare_trees(self.root, other_tree.root)
+  end
+
   def traverse(root = @root, prefix = '')
     puts "#{prefix}#{root.id}"
 
