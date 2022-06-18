@@ -46,7 +46,7 @@ class Graph
 
     add_one_dir_edge(src, dest)
 
-    add_one_dir_edge(dest, src) if directed
+    add_one_dir_edge(dest, src) unless directed
   end
 
   def add_node(id, data)
