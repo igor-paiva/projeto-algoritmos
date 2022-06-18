@@ -52,21 +52,16 @@ class Tree
   end
 
   def insert(root = @root, parent_id, node)
-    # parent.children << Node.new(node_id)
-
     unless root
       root = node
+      return
+    end
+
+    if root.id == parent_id
+      root.children << node
     else
-      if root.id == parent_id
-        root.children << node
-      else
-        root.children.length.times do |i|
-          if root.children[i].id == parent_id
-            insert(root.children[i], parent_id, node);
-          else
-            insert(root.children[i], parent_id, node);
-          end
-        end
+      root.children.length.times do |i|
+        insert(root.children[i], parent_id, node)
       end
     end
   end
