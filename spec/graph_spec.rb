@@ -126,7 +126,7 @@ RSpec.describe Graph do
       },
     ].each do |params|
       it "Should return #{params[:expected_edges]} edges with #{params[:num_nodes]} nodes and #{params[:edges]}" do
-        graph = Graph.new(params[:directed])
+        graph = Graph.new(directed: params[:directed])
 
         add_nodes(graph, Array.new(params[:num_nodes]) { |i| i + 1 })
         add_edges(graph, params[:edges])

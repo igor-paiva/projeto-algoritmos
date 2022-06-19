@@ -16,8 +16,8 @@ class Graph
   attr_reader :nodes
   attr_reader :directed
 
-  def initialize(directed = false)
-    @nodes = {}
+  def initialize(nodes: {}, directed: false)
+    @nodes = nodes
     @directed = directed
   end
 
@@ -53,6 +53,16 @@ class Graph
     node = GraphNode.new(id, data)
 
     nodes[id] = { node: node, adj_list: [] }
+  end
+
+  def reverse
+    reversed_nodes = reverse_graph_nodes
+
+    Graph.new(nodes: reversed_nodes, directed: directed)
+  end
+
+  def reverse!
+    @nodes = reverse_graph_nodes
   end
 
   def bipartite?
@@ -103,6 +113,24 @@ class Graph
   end
 
   private
+
+  def reverse_graph_nodes
+    raise_exception('Reverse only applies to directed graphs') unless directed
+
+    new_nodes = {}
+
+    nodes.each do |id, data|
+      new_nodes[id] = { node: GraphNode.new(id, data[:node]), adj_list: [] }
+    end
+
+    nodes.reverse_each do |node, adj_list|
+      adj_list.each do |el|
+        new_nodes[el].prepend(node)
+      end
+    end
+
+    new_nodes
+  end
 
   def raise_exception(msg)
     raise MyException.new(msg)
