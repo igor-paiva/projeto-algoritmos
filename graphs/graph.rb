@@ -85,6 +85,12 @@ class Graph
     visited_regular.length == visited_reversed.length && visited_regular.length == self.length
   end
 
+  def directed_acyclic?
+    raise_exception('"directed_acyclic?" only applies to directed graphs') unless directed
+
+    count_incoming_edges.has_value?(0)
+  end
+
   def topological_order
     result = []
     count = count_incoming_edges

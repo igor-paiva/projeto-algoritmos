@@ -12,6 +12,7 @@ RSpec.describe Graph do
         [[1, 4], [1, 5], [1, 7], [2, 6], [2, 5], [2, 3], [3, 5], [3, 4], [4, 5], [5, 6], [5, 7], [6, 7]]
       )
 
+      expect(graph.directed_acyclic?).to be true
       expect(graph.topological_order).to match_array([1, 2, 3, 4, 5, 6, 7])
     end
   end
