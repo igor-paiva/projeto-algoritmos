@@ -98,6 +98,30 @@ RSpec.describe Graph do
     end
   end
 
+  describe "#strongly_connected?" do
+    [
+      {
+        num_nodes: 5,
+        edges: [[1, 2], [2, 4], [3, 1], [4, 1], [4, 3], [4, 5], [5, 3]],
+        expected: true
+      },
+      {
+        num_nodes: 5,
+        edges: [[2, 1], [2, 4], [3, 1], [4, 1], [4, 3], [4, 5], [5, 3]],
+        expected: false
+      },
+    ].each do |params|
+      it "Should return #{params[:expected]} edges with #{params[:num_nodes]} nodes and #{params[:edges]}" do
+        graph = Graph.new(directed: true)
+
+        add_nodes(graph, Array.new(params[:num_nodes]) { |i| i + 1 })
+        add_edges(graph, params[:edges])
+
+        expect(graph.strongly_connected?).to be params[:expected]
+      end
+    end
+  end
+
   describe "#edges? and #length" do
     [
       {

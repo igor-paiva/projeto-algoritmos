@@ -65,6 +65,20 @@ class Graph
     @nodes = reverse_graph_nodes
   end
 
+  def strongly_connected?
+    raise_exception('"strongly_connected?" only applies to directed graphs') unless directed
+
+    node = nodes.first[0]
+    visited_regular = {}
+    visited_reversed = {}
+
+    bfs_from_start(node, visited_regular)
+
+    bfs_from_start(node, visited_reversed, reverse_graph_nodes)
+
+    visited_regular.length == visited_reversed.length && visited_regular.length == self.length
+  end
+
   def bipartite?
     visited = {}
     colors = {}
@@ -123,9 +137,9 @@ class Graph
       new_nodes[id] = { node: GraphNode.new(id, data[:node]), adj_list: [] }
     end
 
-    nodes.reverse_each do |node, adj_list|
-      adj_list.each do |el|
-        new_nodes[el].prepend(node)
+    nodes.reverse_each do |node, data|
+      data[:adj_list].each do |el|
+        new_nodes.dig(el, :adj_list).prepend(node)
       end
     end
 
@@ -186,7 +200,7 @@ class Graph
     trees
   end
 
-  def bfs_from_start(start, visited = {})
+  def bfs_from_start(start, visited = {}, nodes = @nodes)
     queue = [start]
 
     visited[start] = true
