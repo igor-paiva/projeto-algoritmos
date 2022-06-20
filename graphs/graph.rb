@@ -33,6 +33,12 @@ class Graph
     sum_all_degrees
   end
 
+  def print_adj_list
+    nodes.each do |node, data|
+      puts "#{node} => #{data[:adj_list]}"
+    end
+  end
+
   def node_exists?(id)
     nodes.has_key?(id)
   end
@@ -77,6 +83,33 @@ class Graph
     bfs_from_start(node, visited_reversed, reverse_graph_nodes)
 
     visited_regular.length == visited_reversed.length && visited_regular.length == self.length
+  end
+
+  def topological_order
+    result = []
+    count = count_incoming_edges
+
+    nodes_with_no_incoming_edges = count.select { |_, value| value == 0 }.keys
+
+    if nodes_with_no_incoming_edges.empty?
+      raise_exception('The graph it is not a Directed Acyclic Graph(DAG)')
+    end
+
+    nodes.length.times do
+      v = nodes_with_no_incoming_edges.first
+
+      result << v
+
+      nodes_with_no_incoming_edges.delete(v)
+
+      nodes[v][:adj_list].each do |neighbor|
+        count[neighbor] -= 1
+
+        nodes_with_no_incoming_edges << neighbor if count[neighbor] == 0
+      end
+    end
+
+    result
   end
 
   def bipartite?
@@ -127,6 +160,18 @@ class Graph
   end
 
   private
+
+  def count_incoming_edges
+    count = Hash[nodes.keys.map { |x| [x, 0] }]
+
+    nodes.each do |_, data|
+      data[:adj_list].each do |el|
+        count[el] += 1
+      end
+    end
+
+    count
+  end
 
   def reverse_graph_nodes
     raise_exception('Reverse only applies to directed graphs') unless directed

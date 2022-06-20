@@ -2,6 +2,20 @@ require 'helpers'
 require_relative '../graphs/graph'
 
 RSpec.describe Graph do
+  describe "#topological_order" do
+    it 'return the topological order as an array of IDs' do
+      graph = Graph.new(directed: true)
+
+      add_nodes(graph, Array.new(7) { |i| i + 1 })
+      add_edges(
+        graph,
+        [[1, 4], [1, 5], [1, 7], [2, 6], [2, 5], [2, 3], [3, 5], [3, 4], [4, 5], [5, 6], [5, 7], [6, 7]]
+      )
+
+      expect(graph.topological_order).to match_array([1, 2, 3, 4, 5, 6, 7])
+    end
+  end
+
   describe "#depth_first_search" do
     graph = Graph.new()
 
