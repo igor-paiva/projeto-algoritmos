@@ -81,6 +81,8 @@ class Graph
 
     bfs_from_start(node, visited_regular)
 
+    return false if visited_regular.length != self.length
+
     bfs_from_start(node, visited_reversed, reverse_graph_nodes)
 
     visited_regular.length == visited_reversed.length && visited_regular.length == self.length
@@ -369,4 +371,4 @@ def main
   puts graph.breadth_first_search('nilfgaardian_garrison', 'poi_27')
 end
 
-main()
+# main()
