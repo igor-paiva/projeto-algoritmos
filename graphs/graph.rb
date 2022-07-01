@@ -1,3 +1,4 @@
+require 'json'
 require_relative 'tree'
 
 class MyException < StandardError; end
@@ -234,10 +235,6 @@ class Graph
     tree
   end
 
-  def bfs_from_start_to_dest(start, dest)
-    puts 'WIP'
-  end
-
   def bfs
     trees = []
     visited = {}
@@ -259,7 +256,7 @@ class Graph
     tree = Tree.new(TreeNode.new(start))
 
     while !queue.empty?
-      u = queue.pop
+      u = queue.shift
 
       nodes.dig(u, :adj_list).each do |v|
         unless visited[v]
@@ -275,6 +272,28 @@ class Graph
     tree
   end
 
+  def bfs_from_start_to_dest(start, dest)
+    queue = [[start]]
+    visited = { start => true }
+
+    while !queue.empty?
+      path = queue.shift
+      u = path.last
+
+      return path if u == dest
+
+      nodes.dig(u, :adj_list).each do |v|
+        unless visited[v]
+          queue.push(path + [v])
+
+          visited[v] = true
+        end
+      end
+    end
+
+    []
+  end
+
   def add_one_dir_edge(src, dest)
     nodes[src][:adj_list] << dest
   end
@@ -283,51 +302,71 @@ end
 def main
   graph = Graph.new()
 
-  graph.add_node(1, {})
-  graph.add_node(2, {})
-  graph.add_node(3, {})
-  graph.add_node(4, {})
-  graph.add_node(5, {})
-  graph.add_node(6, {})
-  graph.add_node(7, {})
+  File.open('../../pa/trab_grafos1/src/assets/mapData.json') do |file|
+    json = JSON.parse(file.read)
 
-  graph.add_edge(1, 4)
-  graph.add_edge(1, 5)
-  graph.add_edge(1, 2)
-  graph.add_edge(4, 2)
-  graph.add_edge(4, 5)
-  graph.add_edge(2, 6)
+    json['points_of_interest'].each do |poi|
+      graph.add_node(poi['id'], poi['properties'])
+    end
 
-  graph.add_edge(3, 7)
+    json['roads'].each do |road|
+      graph.add_node(road['id'], road['properties'])
+    end
+
+    json['edges'].each do |edge|
+      graph.add_edge(*edge)
+    end
+  end
+
+  # graph.add_node(1, {})
+  # graph.add_node(2, {})
+  # graph.add_node(3, {})
+  # graph.add_node(4, {})
+  # graph.add_node(5, {})
+  # graph.add_node(6, {})
+  # graph.add_node(7, {})
+
+  # graph.add_edge(1, 4)
+  # graph.add_edge(1, 5)
+  # graph.add_edge(1, 2)
+  # graph.add_edge(4, 2)
+  # graph.add_edge(4, 5)
+  # graph.add_edge(2, 6)
+
+  # graph.add_edge(3, 7)
 
   puts "Number of nodes: #{graph.length}\n"
   puts "Number of edges: #{graph.edges}\n\n"
 
-  puts 'DFS sem nó de início'
-  Tree.traverse_trees(graph.depth_first_search)
-  puts
+  # puts 'DFS sem nó de início'
+  # Tree.traverse_trees(graph.depth_first_search)
+  # puts
 
-  puts 'DFS com nó de início'
-  tree = graph.depth_first_search(1)
-  tree.traverse(tree.root, "\t")
-  puts
+  # puts 'DFS com nó de início'
+  # tree = graph.depth_first_search(1)
+  # tree.traverse(tree.root, "\t")
+  # puts
 
   # puts 'DFS com nó de início e nó de destino'
   # graph.depth_first_search(1, 6)
 
-  puts "\n-------------------------------------------------------\n\n"
+  # puts "\n-------------------------------------------------------\n\n"
 
-  puts 'BFS sem nó de início:'
-  Tree.traverse_trees(graph.breadth_first_search())
-  puts
+  # puts 'BFS sem nó de início:'
+  # Tree.traverse_trees(graph.breadth_first_search())
+  # puts
 
-  puts 'BFS com nó de início:'
-  tree = graph.breadth_first_search(1)
-  tree.traverse(tree.root, "\t")
-  puts
+  # puts 'BFS com nó de início:'
+  # tree = graph.breadth_first_search(1)
+  # tree.traverse(tree.root, "\t")
+  # puts
 
   # puts 'BFS com nó de início e nó de destino'
-  # graph.breadth_first_search(1, 6)
+  # tree = graph.breadth_first_search(1, 6)
+  # tree.traverse(tree.root, "\t")
+
+  puts 'BFS com nó de início e nó de destino'
+  puts graph.breadth_first_search('nilfgaardian_garrison', 'poi_27')
 end
 
-# main()
+main()
