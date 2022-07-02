@@ -19,6 +19,7 @@ class Graph
   attr_reader :directed
 
   def initialize(nodes: {}, directed: false)
+    @time = 0
     @nodes = nodes
     @directed = directed
   end
@@ -64,13 +65,51 @@ class Graph
   end
 
   def reverse
+    raise_exception('"reverse" only applies to directed graphs') unless directed
+
     reversed_nodes = reverse_graph_nodes
 
     Graph.new(nodes: reversed_nodes, directed: directed)
   end
 
   def reverse!
+    raise_exception('"reverse" only applies to directed graphs') unless directed
+
     @nodes = reverse_graph_nodes
+  end
+
+  def strongly_connected_components
+    scc_components = []
+
+    heap = dfs_numbering(heap: true)
+
+    reverse_graph = self.reverse
+
+    while !heap.empty?
+      item = heap.remove_max
+
+      if reverse_graph.node_exists?(item.id)
+        tree = reverse_graph.depth_first_search(item.id)
+
+        tree.traverse(tree.root, "\t", -> (id)  { reverse_graph.remove_node(id) })
+
+        scc_components << tree
+      end
+    end
+
+    scc_components
+  end
+
+  def remove_node(id)
+    return nil unless node_exists?(id)
+
+    node_data = nodes.delete(id)
+
+    nodes.each do |_, data|
+      data[:adj_list].delete(id)
+    end
+
+    node_data
   end
 
   def strongly_connected?
