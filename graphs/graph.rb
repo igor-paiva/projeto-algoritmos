@@ -1,4 +1,5 @@
 require 'json'
+require_relative 'heap'
 require_relative 'tree'
 
 class MyException < StandardError; end
@@ -168,6 +169,24 @@ class Graph
     return dfs
   end
 
+  def dfs_numbering(heap: true)
+    @time = 1
+    prev = {}
+    post = {}
+
+    dfs(prev, post)
+
+    return prev, post unless heap
+
+    heap = Heap.new(type: :max)
+
+    post.each { |id, value| heap.insert(id, value) }
+
+    @time = 0
+
+    heap
+  end
+
   private
 
   def count_incoming_edges
@@ -208,21 +227,23 @@ class Graph
     puts 'WIP'
   end
 
-  def dfs
+  def dfs(prev = {}, post = {})
     trees = []
     visited = {}
 
     nodes.keys.each do |v|
       next if visited[v]
 
-      trees << dfs_visit(v, visited)
+      trees << dfs_visit(v, visited, nil, prev, post)
     end
 
     trees
   end
 
-  def dfs_visit(v, visited = {}, tree = nil)
+  def dfs_visit(v, visited = {}, tree = nil, prev = {}, post = {})
     visited[v] = true
+    prev[v] = @time
+    @time += 1
 
     tree ||= Tree.new(TreeNode.new(v))
 
@@ -230,9 +251,12 @@ class Graph
       unless visited[w]
         tree.insert(tree.root, v, TreeNode.new(w))
 
-        dfs_visit(w, visited, tree)
+        dfs_visit(w, visited, tree, prev, post)
       end
     end
+
+    post[v] = @time
+    @time += 1
 
     tree
   end
