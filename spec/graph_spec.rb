@@ -2,6 +2,33 @@ require 'helpers'
 require_relative '../graphs/graph'
 
 RSpec.describe Graph do
+  describe "#dfs_numbering" do
+    graph = Graph.new(directed: true)
+
+    add_nodes(graph, ('a'..'h').to_a)
+    add_edges(
+      graph,
+      [['a', 'b'], ['c', 'b'], ['d', 'b'], ['e', 'b'], ['b', 'e'], ['d', 'c'], ['d', 'e'], ['d', 'f'], ['h', 'f'], ['f', 'h'], ['f', 'g'], ['f', 'e'], ['g', 'd']]
+    )
+
+    it 'return the prev and post with the counted time for each node' do
+      prev, post = graph.dfs_numbering(heap: false)
+
+      expect(prev).to eq({"a"=>1, "b"=>2, "e"=>3, "c"=>7, "d"=>9, "f"=>10, "h"=>11, "g"=>13})
+      expect(post).to eq({"e"=>4, "b"=>5, "a"=>6, "c"=>8, "h"=>12, "g"=>14, "f"=>15, "d"=>16})
+    end
+
+    it 'return a heap with the post count info' do
+      heap = graph.dfs_numbering
+
+      mapped_list = heap.list.map { |item| [item&.id, item&.priority] }
+
+      expect(heap.type).to eq :max
+      expect(heap.num).to eq graph.length
+      expect(mapped_list).to eq([[nil, nil], ['d', 16], ['f', 15], ['g', 14], ['c', 8], ['a', 6], ['b', 5], ['h', 12], ['e', 4]])
+    end
+  end
+
   describe "#topological_order" do
     it 'return the topological order as an array of IDs' do
       graph = Graph.new(directed: true)
