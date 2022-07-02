@@ -119,29 +119,39 @@ RSpec.describe Graph do
   end
 
   describe "#breadth_first_search" do
-    graph = Graph.new()
+    context 'when the BFS tree when start and dest nodes are not provided' do
+      graph = Graph.new()
 
-    add_nodes(graph, Array.new(7) { |i| i + 1 })
-    add_edges(
-      graph,
-      [[1, 4], [1, 5], [1, 2], [4, 2], [4, 5], [2, 6], [3, 7]]
-    )
+      add_nodes(graph, Array.new(7) { |i| i + 1 })
+      add_edges(
+        graph,
+        [[1, 4], [1, 5], [1, 2], [4, 2], [4, 5], [2, 6], [3, 7]]
+      )
 
-    it 'return the BFS tree when start and dest nodes are not provided' do
-      expected_trees = [
-        Tree.new(
-          TreeNode.new(
-            1,
-            [TreeNode.new(4), TreeNode.new(5), TreeNode.new(2, [TreeNode.new(6)])]
+      it 'return the BFS tree when start and dest nodes are not provided' do
+        expected_trees = [
+          Tree.new(
+            TreeNode.new(
+              1,
+              [TreeNode.new(4), TreeNode.new(5), TreeNode.new(2, [TreeNode.new(6)])]
+            ),
           ),
-        ),
-        Tree.new(TreeNode.new(3, [TreeNode.new(7)])),
-      ]
+          Tree.new(TreeNode.new(3, [TreeNode.new(7)])),
+        ]
 
-      expect(graph.breadth_first_search).to match_array(expected_trees)
+        expect(graph.breadth_first_search).to match_array(expected_trees)
+      end
     end
 
     context 'when the start node is provided' do
+      graph = Graph.new()
+
+      add_nodes(graph, Array.new(7) { |i| i + 1 })
+      add_edges(
+        graph,
+        [[1, 4], [1, 5], [1, 2], [4, 2], [4, 5], [2, 6], [3, 7]]
+      )
+
       it 'return the BFS tree starting in node 1' do
         expected_tree = Tree.new(
           TreeNode.new(
@@ -162,6 +172,24 @@ RSpec.describe Graph do
         )
 
         expect(graph.breadth_first_search(4)).to eq(expected_tree)
+      end
+    end
+
+    context 'when the start and dest node are provided' do
+      graph = Graph.new()
+
+      load_graph_from_json(graph)
+
+      it 'return the path from start to dest as an array of IDs' do
+        expected_path = ['nilfgaardian_garrison', 'r_01', 'r_03', 'r_04', 'poi_04', 'r_06', 'r_13', 'woesong_bridge', 'r_21', 'r_23', 'ford', 'r_24', 'r_25', 'poi_27']
+
+        expect(graph.breadth_first_search('nilfgaardian_garrison', 'poi_27')).to match_array(expected_path)
+      end
+
+      it 'return the path from start to dest as an array of IDs' do
+        expected_path = ['r_03', 'r_04', 'poi_04', 'r_06',  'r_13',  'r_14',  'r_15',  'r_17',  'broken_bridge', 'poi_08']
+
+        expect(graph.breadth_first_search('r_03', 'poi_08')).to match_array(expected_path)
       end
     end
   end
