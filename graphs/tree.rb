@@ -39,15 +39,23 @@ class Tree
     true
   end
 
+  def to_s
+    traverse(@root, "\t")
+  end
+
   def ==(other_tree)
     Tree.compare_trees(self.root, other_tree.root)
   end
 
-  def traverse(root = @root, prefix = '')
-    puts "#{prefix}#{root.id}"
+  def traverse(root = @root, prefix = '', callback = nil)
+    if callback
+      callback.call(root.id)
+    else
+      puts "#{prefix}#{root.id}"
+    end
 
     root.children.each do |child|
-      traverse(child, "#{prefix}\t")
+      traverse(child, "#{prefix}\t", callback)
     end
   end
 
