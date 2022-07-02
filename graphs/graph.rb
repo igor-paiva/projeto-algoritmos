@@ -86,7 +86,7 @@ class Graph
     reverse_graph = self.reverse
 
     while !heap.empty?
-      item = heap.remove_max
+      item = heap.remove
 
       if reverse_graph.node_exists?(item.id)
         tree = reverse_graph.depth_first_search(item.id)

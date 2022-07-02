@@ -64,7 +64,7 @@ class Heap
     fix_up(@num)
   end
 
-  def remove_max
+  def remove
     swap_items(1, @num)
 
     fix_down(1)
