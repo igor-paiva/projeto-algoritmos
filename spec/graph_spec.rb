@@ -2,6 +2,32 @@ require 'helpers'
 require_relative '../graphs/graph'
 
 RSpec.describe Graph do
+  describe "#strongly_connected_components" do
+    graph = Graph.new(directed: true)
+
+    add_nodes(graph, ['s', 'v', 'w', 'q', 't', 'x', 'z', 'y', 'r', 'u'])
+    add_edges(
+      graph,
+      [['s', 'w'], ['w', 'v'], ['v', 's'], ['s', 'q'], ['w', 'q'], ['t', 'q'], ['q', 'y'], ['y', 't'], ['x', 't'], ['z', 'x'], ['x', 'z'], ['y', 'r'], ['y', 'u'], ['u', 'r']]
+    )
+
+    it 'return the SCC components as trees' do
+      sccs = graph.strongly_connected_components
+
+      expected_sccs = [
+        Tree.new(
+          TreeNode.new('x', [TreeNode.new('z')]),
+        ),
+        Tree.new(TreeNode.new('s', [TreeNode.new('v', [TreeNode.new('w')])])),
+        Tree.new(TreeNode.new('q', [TreeNode.new('t', [TreeNode.new('y')])])),
+        Tree.new(TreeNode.new('u')),
+        Tree.new(TreeNode.new('r')),
+      ]
+
+      expect(sccs).to match_array(expected_sccs)
+    end
+  end
+
   describe "#dfs_numbering" do
     graph = Graph.new(directed: true)
 
