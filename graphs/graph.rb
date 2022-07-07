@@ -226,6 +226,23 @@ class Graph
     heap
   end
 
+  def dijkstra(start, dest)
+    path = []
+    predecessors = dijkstra_algorithm(start, dest)
+
+    return nil unless predecessors.has_key?(dest)
+
+    loop do
+      path << dest
+
+      break if dest == start
+
+      dest = predecessors[dest]
+    end
+
+    path.reverse
+  end
+
   private
 
   def count_incoming_edges
@@ -362,76 +379,37 @@ class Graph
   def add_one_dir_edge(src, dest, cost)
     nodes[src][:adj_list] << { to: dest, cost: cost }
   end
-end
 
-def main
-  graph = Graph.new()
+  def dijkstra_algorithm(start, dest)
+    distances = {}
+    predecessors = {}
 
-  File.open('../../pa/trab_grafos1/src/assets/mapData.json') do |file|
-    json = JSON.parse(file.read)
+    heap = Heap.new(type: :min)
+    heap.insert(start, 0)
 
-    json['points_of_interest'].each do |poi|
-      graph.add_node(poi['id'], poi['properties'])
+    while !heap.empty?
+      smallest = heap.remove
+      distances[smallest.id] = smallest.priority
+
+      break if smallest.id == dest
+
+      nodes.dig(smallest.id, :adj_list).each do |data|
+        vwLength = distances[smallest.id] + data[:cost]
+
+        if distances.has_key?(data[:to])
+          raise_exception('Found better path to already-final vertex') if vwLength < distances[data[:to]]
+        elsif !heap.els_hash.has_key?(data[:to])
+          heap.insert(data[:to], vwLength)
+
+          predecessors[data[:to]] = smallest.id
+        elsif vwLength < heap.get_item(data[:to]).priority
+          heap.change_priority(data[:to], vwLength)
+
+          predecessors[data[:to]] = smallest.id
+        end
+      end
     end
 
-    json['roads'].each do |road|
-      graph.add_node(road['id'], road['properties'])
-    end
-
-    json['edges'].each do |edge|
-      graph.add_edge(*edge)
-    end
+    predecessors
   end
-
-  # graph.add_node(1, {})
-  # graph.add_node(2, {})
-  # graph.add_node(3, {})
-  # graph.add_node(4, {})
-  # graph.add_node(5, {})
-  # graph.add_node(6, {})
-  # graph.add_node(7, {})
-
-  # graph.add_edge(1, 4)
-  # graph.add_edge(1, 5)
-  # graph.add_edge(1, 2)
-  # graph.add_edge(4, 2)
-  # graph.add_edge(4, 5)
-  # graph.add_edge(2, 6)
-
-  # graph.add_edge(3, 7)
-
-  puts "Number of nodes: #{graph.length}\n"
-  puts "Number of edges: #{graph.edges}\n\n"
-
-  # puts 'DFS sem nó de início'
-  # Tree.traverse_trees(graph.depth_first_search)
-  # puts
-
-  # puts 'DFS com nó de início'
-  # tree = graph.depth_first_search(1)
-  # tree.traverse(tree.root, "\t")
-  # puts
-
-  # puts 'DFS com nó de início e nó de destino'
-  # graph.depth_first_search(1, 6)
-
-  # puts "\n-------------------------------------------------------\n\n"
-
-  # puts 'BFS sem nó de início:'
-  # Tree.traverse_trees(graph.breadth_first_search())
-  # puts
-
-  # puts 'BFS com nó de início:'
-  # tree = graph.breadth_first_search(1)
-  # tree.traverse(tree.root, "\t")
-  # puts
-
-  # puts 'BFS com nó de início e nó de destino'
-  # tree = graph.breadth_first_search(1, 6)
-  # tree.traverse(tree.root, "\t")
-
-  puts 'BFS com nó de início e nó de destino'
-  puts graph.breadth_first_search('nilfgaardian_garrison', 'poi_27')
 end
-
-# main()
