@@ -46,14 +46,14 @@ class Graph
     nodes.has_key?(id)
   end
 
-  def add_edge(src, dest)
+  def add_edge(src, dest, cost = 1)
     raise_exception("node '#{src}' does not exist") unless node_exists?(src)
 
     raise_exception("node '#{dest}' does not exist") unless node_exists?(dest)
 
-    add_one_dir_edge(src, dest)
+    add_one_dir_edge(src, dest, cost)
 
-    add_one_dir_edge(dest, src) unless directed
+    add_one_dir_edge(dest, src, cost) unless directed
   end
 
   def add_node(id, data)
@@ -106,7 +106,7 @@ class Graph
     node_data = nodes.delete(id)
 
     nodes.each do |_, data|
-      data[:adj_list].delete(id)
+      data[:adj_list].filter! { |edge| edge[:to] != id }
     end
 
     node_data
@@ -152,9 +152,9 @@ class Graph
       nodes_with_no_incoming_edges.delete(v)
 
       nodes[v][:adj_list].each do |neighbor|
-        count[neighbor] -= 1
+        count[neighbor[:to]] -= 1
 
-        nodes_with_no_incoming_edges << neighbor if count[neighbor] == 0
+        nodes_with_no_incoming_edges << neighbor[:to] if count[neighbor[:to]] == 0
       end
     end
 
@@ -176,14 +176,14 @@ class Graph
       while !queue.empty?
         u = queue.pop
 
-        nodes.dig(u, :adj_list).each do |v|
-          unless visited[v]
-            visited[v] = true
-            colors[v] = !colors[u]
+        nodes.dig(u, :adj_list).each do |edge|
+          unless visited[edge[:to]]
+            visited[edge[:to]] = true
+            colors[edge[:to]] = !colors[u]
 
-            queue.push(v)
+            queue.push(edge[:to])
           else
-            return false if colors[u] == colors[v]
+            return false if colors[u] == colors[edge[:to]]
           end
         end
       end
@@ -232,8 +232,8 @@ class Graph
     count = Hash[nodes.keys.map { |x| [x, 0] }]
 
     nodes.each do |_, data|
-      data[:adj_list].each do |el|
-        count[el] += 1
+      data[:adj_list].each do |edge|
+        count[edge[:to]] += 1
       end
     end
 
@@ -246,12 +246,12 @@ class Graph
     new_nodes = {}
 
     nodes.each do |id, data|
-      new_nodes[id] = { node: GraphNode.new(id, data[:node]), adj_list: [] }
+      new_nodes[id] = { node: GraphNode.new(id, data[:node].data), adj_list: [] }
     end
 
     nodes.reverse_each do |node, data|
-      data[:adj_list].each do |el|
-        new_nodes.dig(el, :adj_list).prepend(node)
+      data[:adj_list].each do |edge|
+        new_nodes.dig(edge[:to], :adj_list).prepend({ to: node, cost: edge[:cost] })
       end
     end
 
@@ -286,11 +286,11 @@ class Graph
 
     tree ||= Tree.new(TreeNode.new(v))
 
-    nodes.dig(v, :adj_list).each do |w|
-      unless visited[w]
-        tree.insert(tree.root, v, TreeNode.new(w))
+    nodes.dig(v, :adj_list).each do |edge|
+      unless visited[edge[:to]]
+        tree.insert(tree.root, v, TreeNode.new(edge[:to]))
 
-        dfs_visit(w, visited, tree, prev, post)
+        dfs_visit(edge[:to], visited, tree, prev, post)
       end
     end
 
@@ -323,13 +323,13 @@ class Graph
     while !queue.empty?
       u = queue.shift
 
-      nodes.dig(u, :adj_list).each do |v|
-        unless visited[v]
-          visited[v] = true
+      nodes.dig(u, :adj_list).each do |edge|
+        unless visited[edge[:to]]
+          visited[edge[:to]] = true
 
-          tree.insert(tree.root, u, TreeNode.new(v))
+          tree.insert(tree.root, u, TreeNode.new(edge[:to]))
 
-          queue.push(v)
+          queue.push(edge[:to])
         end
       end
     end
@@ -347,11 +347,11 @@ class Graph
 
       return path if u == dest
 
-      nodes.dig(u, :adj_list).each do |v|
-        unless visited[v]
-          queue.push(path + [v])
+      nodes.dig(u, :adj_list).each do |edge|
+        unless visited[edge[:to]]
+          queue.push(path + [edge[:to]])
 
-          visited[v] = true
+          visited[edge[:to]] = true
         end
       end
     end
@@ -359,8 +359,8 @@ class Graph
     []
   end
 
-  def add_one_dir_edge(src, dest)
-    nodes[src][:adj_list] << dest
+  def add_one_dir_edge(src, dest, cost)
+    nodes[src][:adj_list] << { to: dest, cost: cost }
   end
 end
 
