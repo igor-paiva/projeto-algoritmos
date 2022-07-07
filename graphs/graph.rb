@@ -394,16 +394,16 @@ class Graph
       break if smallest.id == dest
 
       nodes.dig(smallest.id, :adj_list).each do |data|
-        vwLength = distances[smallest.id] + data[:cost]
+        current_distance = distances[smallest.id] + data[:cost]
 
         if distances.has_key?(data[:to])
-          raise_exception('Found better path to already-final vertex') if vwLength < distances[data[:to]]
+          raise_exception('Found better path to already-final vertex') if current_distance < distances[data[:to]]
         elsif !heap.els_hash.has_key?(data[:to])
-          heap.insert(data[:to], vwLength)
+          heap.insert(data[:to], current_distance)
 
           predecessors[data[:to]] = smallest.id
-        elsif vwLength < heap.get_item(data[:to]).priority
-          heap.change_priority(data[:to], vwLength)
+        elsif current_distance < heap.get_item(data[:to]).priority
+          heap.change_priority(data[:to], current_distance)
 
           predecessors[data[:to]] = smallest.id
         end
